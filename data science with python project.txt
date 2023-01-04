@@ -1,0 +1,68 @@
+// Project-3: DESCRIPTION
+
+Comcast is an American global telecommunication company. The firm has been providing terrible customer service. They continue to fall short despite repeated promises to improve. Only last month (October 2016) the authority fined them a $2.3 million, after receiving over 1000 consumer complaints.
+The existing database will serve as a repository of public customer complaints filed against Comcast.
+It will help to pin down what is wrong with Comcast's customer service. //
+
+import pandas as pd
+import numpy as nd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+data = pd.read_csv(r"C:\Users\Vinod_Project-3\Comcast_telecom_complaints_data.csv")
+data.head()
+
+data.info()
+
+data['Date'] = pd.to_datetime(data['Date'])
+data
+data.info()
+
+data['Month'] = data['Date'].dt.month_name()
+data.head()
+
+data['Date'].value_counts()
+
+dates = data.groupby(['Date'])['Ticket #'].count()
+dates
+
+daily = pd.DataFrame(dates).reset_index()
+daily.head()
+
+daily.plot(x='Date',y='Ticket #',kind='line')
+
+month=data.groupby('Month')['Ticket #'].count()
+month=pd.DataFrame(month).reset_index()
+month
+
+month.plot(x='Month',y='Ticket #',kind='bar')
+
+data['Customer Complaint'].value_counts()[:9]
+
+data['Customer Complaint'].value_counts()[:9].plot.bar()
+
+data['NewStatus']=["Open" if st=="Open" or st=="Pending" else "Closed" for st in data['Status']]
+
+data['Status'].unique()
+data
+
+state_complain=data.groupby(['State','NewStatus']).size().unstack()
+state_complain
+
+state_complain.plot.bar(stacked=True,figsize=(10,7))
+
+data.groupby('State').size().sort_values(ascending=False)[:5]
+
+unresolved_data=data.groupby(['State','NewStatus']).size().unstack().fillna(0).sort_values(by='Open',ascending=False)
+unresolved_data
+
+resolved_data=data.groupby(['Received Via','NewStatus']).size().unstack()
+resolved_data
+
+resolved_data['resolved']=resolved_data['Closed']/resolved_data['Closed'].sum()*100
+resolved_data
+
+resolved_data.plot(kind='bar',figsize=(10,7))
+
+internet_issue=data[data['Customer Complaint'].str.contains('internet')].count()
+internet_issue
